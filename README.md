@@ -10,9 +10,9 @@
 
 | | |
 |---|---|
-| 🌐 網站 | <https://tingwei161803.github.io/pikmin-business-analysis/> |
+| 🌐 網站 | <https://pikmin-business-analysis.peteraim.com/> |
 
-> 直接點進去就能用，無需安裝。可用 `https://tingwei161803.github.io/pikmin-business-analysis/#<slug>` 深連結到文章內的特定章節。
+> 直接點進去就能用，無需安裝。可用 `https://pikmin-business-analysis.peteraim.com/#<slug>` 深連結到文章內的特定章節。
 
 ---
 
