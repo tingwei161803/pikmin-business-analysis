@@ -5,6 +5,9 @@
 -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://pikmin-business-analysis.peteraim.com/</loc>
+  </url>
+  <url>
     <loc>https://pikmin-business-analysis.peteraim.com/behavior.html</loc>
   </url>
   <url>
@@ -20,10 +23,43 @@
     <loc>https://pikmin-business-analysis.peteraim.com/effectuation.html</loc>
   </url>
   <url>
-    <loc>https://pikmin-business-analysis.peteraim.com/facts.html</loc>
+    <loc>https://pikmin-business-analysis.peteraim.com/en/</loc>
   </url>
   <url>
-    <loc>https://pikmin-business-analysis.peteraim.com/</loc>
+    <loc>https://pikmin-business-analysis.peteraim.com/en/behavior.html</loc>
+  </url>
+  <url>
+    <loc>https://pikmin-business-analysis.peteraim.com/en/causal-vs-effectual.html</loc>
+  </url>
+  <url>
+    <loc>https://pikmin-business-analysis.peteraim.com/en/causation.html</loc>
+  </url>
+  <url>
+    <loc>https://pikmin-business-analysis.peteraim.com/en/data.html</loc>
+  </url>
+  <url>
+    <loc>https://pikmin-business-analysis.peteraim.com/en/effectuation.html</loc>
+  </url>
+  <url>
+    <loc>https://pikmin-business-analysis.peteraim.com/en/facts.html</loc>
+  </url>
+  <url>
+    <loc>https://pikmin-business-analysis.peteraim.com/en/quiz.html</loc>
+  </url>
+  <url>
+    <loc>https://pikmin-business-analysis.peteraim.com/en/strategy.html</loc>
+  </url>
+  <url>
+    <loc>https://pikmin-business-analysis.peteraim.com/en/thesis.html</loc>
+  </url>
+  <url>
+    <loc>https://pikmin-business-analysis.peteraim.com/en/timeline.html</loc>
+  </url>
+  <url>
+    <loc>https://pikmin-business-analysis.peteraim.com/en/virality.html</loc>
+  </url>
+  <url>
+    <loc>https://pikmin-business-analysis.peteraim.com/facts.html</loc>
   </url>
   <url>
     <loc>https://pikmin-business-analysis.peteraim.com/quiz.html</loc>

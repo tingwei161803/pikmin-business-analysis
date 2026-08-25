@@ -10,7 +10,8 @@
 
 | | |
 |---|---|
-| 🌐 網站 | <https://pikmin-business-analysis.peteraim.com/> |
+| 🌐 網站（中文） | <https://pikmin-business-analysis.peteraim.com/> |
+| 🌐 Site (English) | <https://pikmin-business-analysis.peteraim.com/en/> |
 
 > 直接點進去就能用，無需安裝。可用 `https://pikmin-business-analysis.peteraim.com/#<slug>` 深連結到文章內的特定章節。
 
@@ -19,7 +20,7 @@
 ## ✨ 功能特色
 
 - 🧭 **多頁面 × 複合多區段** — 12 個頁面，各用最適合的版型：總覽（hub）、核心命題（捲動敘事 scrolly）、因果 vs 效果（並列比較）、五篇理論長文（article）、商業數據（dashboard 圖表）、時間軸（timeline）、事實檔案（FAQ）、隨堂測驗（quiz）。
-- 🌏 **雙語切換** — 中文 / English 一鍵全頁切換，連標題、導覽、SEO meta 都重繪，無殘留。
+- 🌏 **一種語言一個網址** — 中文在 `/`、English 在 `/en/`，各自可分享、可被搜尋到；切換鈕是連結，會帶你到同一頁的另一語言版本。
 - 🌗 **深色 / 淺色模式** — 暖色編輯雜誌風，手動切換並記憶偏好。
 - 📊 **互動圖表** — 純 SVG 繪製的營收長條圖與累計營收折線圖（零圖表函式庫）。
 - 📝 **隨堂測驗** — 六題即時對錯回饋 + 計分（僅活在當前 session）。
@@ -44,6 +45,7 @@ pikmin-business-analysis/
 ├── timeline.html         # 時間軸（timeline）
 ├── facts.html            # 事實檔案（faq）
 ├── quiz.html             # 隨堂測驗（quiz）
+├── en/                   # 以上十二頁的英文版，網址是 /en/<同檔名>
 ├── assets/               # styles.css（編輯雜誌風）、shell.js（共用 chrome）、app.js（版型引擎）
 ├── data/data.js          # 唯一資料層：SITE_META + SITE_PAGES[]（雙語）
 ├── research/             # 原始研究檔案（總覽 + 事實檔案 + 5 篇分析的 markdown 原稿）
