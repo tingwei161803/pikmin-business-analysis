@@ -38,7 +38,29 @@
     function head(p) {
       var sub = t(p.subtitle)
         ? '<p class="page-head__sub">' + esc(t(p.subtitle)) + "</p>" : "";
-      return '<header class="page-head"><h1>' + esc(t(p.title)) + "</h1>" + sub + "</header>";
+      var no = L.chapterNo(p);
+      return '<header class="page-head">' +
+        (no ? '<span class="page-head__no" aria-hidden="true">' + no + "</span>" : "") +
+        "<h1>" + esc(t(p.title)) + "</h1>" + sub + "</header>";
+    }
+
+    /* previous / next chapter at the foot of every chapter page */
+    function pager(p) {
+      var list = L.chapters(), i = list.indexOf(p);
+      if (i === -1) return "";
+      var home = L.pages[0];
+      function link(q, dir, cls) {
+        var no = q === home ? "" : L.chapterNo(q);
+        var label = q === home ? L.ui("contents") : L.navLabel(q);
+        return '<a class="pager__link ' + cls + " tone--" + esc(q.tone || "red") + '" href="' + esc(L.pageHref(q)) + '">' +
+          '<span class="pager__dir">' + esc(dir) + "</span>" +
+          '<span class="pager__title">' + (no ? '<span class="pager__no">' + no + "</span>" : "") + esc(label) + "</span></a>";
+      }
+      var prev = i > 0 ? list[i - 1] : home;
+      var next = i < list.length - 1 ? list[i + 1] : null;
+      return '<nav class="pager" aria-label="' + esc(L.ui("chapters")) + '">' +
+        link(prev, L.ui("prev"), "pager__link--prev") +
+        (next ? link(next, L.ui("next"), "pager__link--next") : "") + "</nav>";
     }
 
     function barChart(series, accent) {
@@ -90,23 +112,69 @@
        ===================================================================== */
     var RENDERERS = {
 
-      /* ---- hub: hero stats + a card linking to every other page ---- */
+      /* ---- hub: the thesis + three postcards, then a chapter index ----
+         The index is grouped by SITE_META.parts (argument / lens / evidence);
+         each group gets its own treatment instead of one uniform card grid. */
       hub: function (p) {
-        var stats = (p.stats || []).map(function (s) {
-          return '<div class="hero__stat" data-item>' +
-            '<b class="hero__stat-value" data-count="' + esc(String(s.value)) + '">0</b>' +
-            '<span class="hero__stat-label">' + esc(t(s.label)) + "</span></div>";
+        var stats = p.stats || [];
+        var cards = stats.filter(function (s) { return s.kind !== "note"; });
+        var note = stats.filter(function (s) { return s.kind === "note"; })[0];
+        var tones = ["red", "blue", "green"];
+        /* an empty string in one language means "nothing here", not "borrow the other one" */
+        function own(obj) { return obj && obj[L.state.lang] != null ? obj[L.state.lang] : t(obj); }
+        var postcards = cards.map(function (s, i) {
+          return '<figure class="postcard postcard--' + (i + 1) + " tone--" + tones[i % tones.length] + '" data-item>' +
+            '<div class="postcard__stamp"><div class="postcard__face">' +
+              '<svg class="postcard__mark" viewBox="0 0 64 40" aria-hidden="true" focusable="false">' +
+                '<circle cx="20" cy="20" r="15" /><circle cx="20" cy="20" r="11" />' +
+                '<path d="M38 12c4-3 8 3 12 0s8 3 12 0M38 20c4-3 8 3 12 0s8 3 12 0M38 28c4-3 8 3 12 0s8 3 12 0" /></svg>' +
+              '<p class="postcard__fig">' + esc(t(s.fig) || String(s.value)) +
+                (own(s.unit) ? '<span class="postcard__unit">' + esc(own(s.unit)) + "</span>" : "") + "</p>" +
+              '<figcaption class="postcard__cap">' + esc(t(s.label)) + "</figcaption>" +
+            "</div></div></figure>";
         }).join("");
-        var cards = L.pages.filter(function (q) { return q.slug !== "home"; }).map(function (q) {
-          return '<a class="card card--nav" data-item href="' + esc(L.pageHref(q)) + '" ' +
-              'aria-label="' + esc(t(q.title)) + '">' +
-            '<span class="material-symbols-rounded card__icon" aria-hidden="true">' + esc(q.icon || "label") + "</span>" +
-            '<h3 class="card__title">' + esc(t(q.title)) + "</h3>" +
-            '<p class="card__summary">' + esc(t(q.subtitle)) + "</p></a>";
+        var noteHtml = note
+          ? '<p class="hero__note" data-item>' +
+              '<svg class="hero__arrow" viewBox="0 0 60 48" aria-hidden="true" focusable="false">' +
+                '<path d="M54 6C40 4 22 10 14 26c-2 5-3 10-3 15M4 33l7 9 8-8" /></svg>' +
+              esc(t(note.label)) + "</p>"
+          : "";
+        var thesis = t(p.thesis).split("\n").map(function (line) {
+          return '<span class="hero__line">' + esc(line) + "</span>";
         }).join("");
-        return head(p) +
-          (stats ? '<div class="hero__stats">' + stats + "</div>" : "") +
-          '<div class="grid">' + cards + "</div>";
+
+        var parts = (L.meta.parts || []).map(function (part) {
+          var pages = L.chapters().filter(function (q) { return q.part === part.key; });
+          if (!pages.length) return "";
+          var items = pages.map(function (q) {
+            return '<li class="chap tone--' + esc(q.tone || "red") + '" data-item>' +
+              '<a class="chap__link" href="' + esc(L.pageHref(q)) + '">' +
+                '<span class="chap__no" aria-hidden="true">' + L.chapterNo(q) + "</span>" +
+                '<span class="chap__body">' +
+                  '<span class="chap__title">' + L.flower("chap__mark") + esc(t(q.title)) + "</span>" +
+                  '<span class="chap__dek">' + esc(t(q.subtitle)) + "</span>" +
+                "</span></a></li>";
+          }).join("");
+          var startNo = L.chapters().indexOf(pages[0]) + 1;
+          return '<section class="part part--' + esc(part.key) + '">' +
+            '<p class="part__note">' + esc(t(part.note)) + "</p>" +
+            '<ol class="part__list" start="' + startNo + '">' + items + "</ol></section>";
+        }).join("");
+
+        return '<section class="hero" aria-labelledby="heroTitle">' +
+            '<div class="hero__text">' +
+              '<h1 class="hero__title" id="heroTitle">' +
+                '<span class="hero__kicker">' + esc(t(p.title)) + "</span>" +
+                '<span class="hero__thesis">' + thesis + "</span></h1>" +
+              '<p class="hero__lede">' + esc(t(p.subtitle)) + "</p>" +
+            "</div>" +
+            '<div class="hero__cards">' + postcards + noteHtml + "</div>" +
+          "</section>" +
+          '<div class="divider" aria-hidden="true">' + L.flower() + L.flower() + L.flower() + "</div>" +
+          '<section class="contents" aria-labelledby="contentsTitle">' +
+            '<h2 class="contents__title" id="contentsTitle">' + esc(L.ui("contents")) + "</h2>" +
+            parts +
+          "</section>";
       },
 
       /* ---- gallery: search + chips + card grid + dialog ---- */
@@ -337,7 +405,7 @@
        WIRING (interactions) — keyed by layout, run after innerHTML is set
        ===================================================================== */
     var WIRE = {
-      hub: function () { animateCounters(); },
+      hub: function () { /* static: the postcards carry their own figures */ },
 
       gallery: function (p) {
         var grid = document.getElementById("grid");
@@ -571,6 +639,10 @@
       scrolly: function (p) {
         var visual = document.getElementById("scrollyVisual");
         var steps = [].slice.call(pageEl.querySelectorAll(".scrolly-step"));
+        /* dimming of inactive steps only starts once the observer is driving them,
+           so a reader without JS (or with no IntersectionObserver) sees every step */
+        var stepsBox = pageEl.querySelector(".scrolly-steps");
+        if (stepsBox && "IntersectionObserver" in window) stepsBox.classList.add("is-live");
         function paintVisual(i) {
           var s = (p.steps || [])[i]; if (!s) return;
           var v = s.visual || {};
@@ -668,45 +740,6 @@
       }
     };
 
-    /* ---- hero count-up (shared by hub) ---- */
-    function animateCounters() {
-      var els = [].slice.call(pageEl.querySelectorAll(".hero__stat-value[data-count]"));
-      if (!els.length) return;
-      function run(el) {
-        var target = parseFloat(el.dataset.count) || 0, dur = 1000, start = null;
-        function step(ts) {
-          if (start === null) start = ts;
-          var pr = Math.min(1, (ts - start) / dur), eased = 1 - Math.pow(1 - pr, 3);
-          el.textContent = String(Math.round(target * eased));
-          if (pr < 1) requestAnimationFrame(step); else el.textContent = String(target);
-        }
-        requestAnimationFrame(step);
-      }
-      if (!("IntersectionObserver" in window)) { els.forEach(run); return; }
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (en) { if (en.isIntersecting) { run(en.target); io.unobserve(en.target); } });
-      }, { threshold: 0.4 });
-      els.forEach(function (el) { io.observe(el); });
-      teardowns.push(function () { io.disconnect(); });
-    }
-
-    /* ---- scroll-reveal: gentle fade-in for content blocks (editorial feel) ---- */
-    function reveal() {
-      var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduce || !("IntersectionObserver" in window)) return;
-      /* scrolly steps run their own opacity logic — leave them alone */
-      var els = [].slice.call(pageEl.querySelectorAll("[data-item]:not(.scrolly-step)"));
-      if (!els.length) return;
-      els.forEach(function (el) { el.classList.add("reveal"); });
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (en) {
-          if (en.isIntersecting) { en.target.classList.add("reveal--in"); io.unobserve(en.target); }
-        });
-      }, { rootMargin: "0px 0px -8% 0px", threshold: 0.06 });
-      els.forEach(function (el) { io.observe(el); });
-      teardowns.push(function () { io.disconnect(); });
-    }
-
     /* =====================================================================
        RENDER the current page
        ===================================================================== */
@@ -716,11 +749,10 @@
       var p = L.currentPage();
       if (!p) { pageEl.innerHTML = '<p class="empty">No page data.</p>'; return; }
       var fn = RENDERERS[p.layout] || RENDERERS.gallery;
-      pageEl.className = "page page--" + p.layout;
-      pageEl.innerHTML = fn(p);
+      pageEl.className = "page page--" + p.layout + " tone--" + (p.tone || "red");
+      pageEl.innerHTML = fn(p) + pager(p);
       var w = WIRE[p.layout];
       if (w) w(p);
-      reveal();
     }
 
     render();

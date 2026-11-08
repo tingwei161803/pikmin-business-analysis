@@ -21,7 +21,8 @@
 
 - 🧭 **多頁面 × 複合多區段** — 12 個頁面，各用最適合的版型：總覽（hub）、核心命題（捲動敘事 scrolly）、因果 vs 效果（並列比較）、五篇理論長文（article）、商業數據（dashboard 圖表）、時間軸（timeline）、事實檔案（FAQ）、隨堂測驗（quiz）。
 - 🌏 **一種語言一個網址** — 中文在 `/`、English 在 `/en/`，各自可分享、可被搜尋到；切換鈕是連結，會帶你到同一頁的另一語言版本。
-- 🌗 **深色 / 淺色模式** — 暖色編輯雜誌風，手動切換並記憶偏好。
+- 🌗 **深色 / 淺色模式** — 預設跟隨系統設定；手動切換後會記住你的選擇。
+- 🌼 **壓花野帳風格** — 首頁直接把核心命題寫成大標，旁邊夾著三張郵票齒邊的明信片（數據），下面是分三段的章節目錄；頁邊註記用霞鶩文楷手寫字。
 - 📊 **互動圖表** — 純 SVG 繪製的營收長條圖與累計營收折線圖（零圖表函式庫）。
 - 📝 **隨堂測驗** — 六題即時對錯回饋 + 計分（僅活在當前 session）。
 - 🔗 **深連結** — 文章章節有 `#<slug>` 錨點，可直接分享。
@@ -36,7 +37,7 @@
 
 ```
 pikmin-business-analysis/
-├── index.html            # 首頁（hub 總覽）
+├── index.html            # 首頁（核心命題 + 明信片 + 章節目錄）
 ├── thesis.html           # 核心命題（scrolly）
 ├── causal-vs-effectual.html  # 因果 vs 效果（comparison）
 ├── effectuation.html / causation.html / behavior.html
@@ -46,7 +47,7 @@ pikmin-business-analysis/
 ├── facts.html            # 事實檔案（faq）
 ├── quiz.html             # 隨堂測驗（quiz）
 ├── en/                   # 以上十二頁的英文版，網址是 /en/<同檔名>
-├── assets/               # styles.css（編輯雜誌風）、shell.js（共用 chrome）、app.js（版型引擎）
+├── assets/               # styles.css（壓花野帳風）、shell.js（共用 chrome）、app.js（版型引擎）
 ├── data/data.js          # 唯一資料層：SITE_META + SITE_PAGES[]（雙語）
 ├── research/             # 原始研究檔案（總覽 + 事實檔案 + 5 篇分析的 markdown 原稿）
 └── .nojekyll
