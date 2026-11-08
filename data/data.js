@@ -9,7 +9,13 @@ window.SITE_META = {
   subtitle: { en: "A multi-framework analysis of a quiet hit.",
               zh: "一場用多重理論框架拆解的成功解剖。" },
   footer:   { en: "Static research site · compiled from public sources. Non-official.",
-              zh: "純靜態研究網站 · 資料整理自公開來源 · 非官方。" }
+              zh: "純靜態研究網站 · 資料整理自公開來源 · 非官方。" },
+  /* 首頁目錄的三段分組（對應每頁的 part），note 是寫在頁邊的手寫註記 */
+  parts: [
+    { key: "argument", note: { en: "Start with the argument", zh: "先讀命題" } },
+    { key: "lens",     note: { en: "Then look through five lenses", zh: "再換五個透鏡看" } },
+    { key: "evidence", note: { en: "Then check the evidence", zh: "最後對數字和事實" } }
+  ]
 };
 
 window.SITE_PAGES = [
@@ -17,20 +23,29 @@ window.SITE_PAGES = [
 /* ===================== HOME / HUB ===================== */
 {
   slug: "home", layout: "hub", icon: "local_florist",
+  nav:      { en: "Home", zh: "首頁" }, tone: "red",
   title:    { en: "Why Pikmin Bloom Won", zh: "皮克敏 Bloom 為什麼成功" },
   subtitle: { en: "Niantic × Nintendo turned daily steps into flowers, postcards and quiet companionship — no PvP, no FOMO. This is a multi-framework dissection: what was designed, and what merely grew. Core thesis: imperfection, not perfection, is the engine of virality.",
               zh: "Niantic × 任天堂把每日步數變成種花、收明信片與低壓陪伴——無 PvP、無 FOMO。這是一場多重框架的解剖：哪些成功是「設計」出來的，哪些只是「長」出來的。核心命題：不完美，而非完美，才是傳播的引擎。" },
+  /* 首頁大標：核心命題本身（\n 是刻意的斷行） */
+  thesis:   { en: "Imperfection is\nthe engine of virality.", zh: "不完美，\n才是傳播的引擎。" },
+  /* 首頁的三張明信片 + 一則頁邊註記（kind: "note"） */
   stats: [
-    { value: 100, label: { en: "Lifetime spend (US$M, by Dec 2025)", zh: "累計玩家消費（百萬美元，2025/12）" } },
-    { value: 5,   label: { en: "Theoretical lenses used", zh: "套用的理論框架" } },
-    { value: 0,   label: { en: "PvP modes (deliberately zero)", zh: "PvP 對戰（刻意為零）" } },
-    { value: 120, label: { en: "Monthly active users (×10k)", zh: "月活躍用戶（萬）" } }
+    { value: 100, fig: { en: "$100M", zh: "1 億" }, unit: { en: "", zh: "美元" },
+      label: { en: "lifetime player spend, through Dec 2025", zh: "玩家累計消費，至 2025/12" } },
+    { value: 120, fig: { en: "1.2M", zh: "120 萬" }, unit: { en: "", zh: "人" },
+      label: { en: "monthly active users, still walking", zh: "月活躍用戶，每個月都還在走" } },
+    { value: 0,   fig: { en: "0", zh: "0" }, unit: { en: "PvP", zh: "PvP" },
+      label: { en: "PvP modes, deliberately zero", zh: "對戰模式，刻意為零" } },
+    { value: 5,   kind: "note",
+      label: { en: "taken apart with 5 theoretical lenses", zh: "拿 5 套理論框架來拆" } }
   ]
 },
 
 /* ===================== THESIS / SCROLLY ===================== */
 {
   slug: "thesis", layout: "scrolly", icon: "auto_stories",
+  nav:      { en: "Thesis", zh: "核心命題" }, part: "argument", tone: "red",
   title:    { en: "The Core Thesis: Imperfection Is the Engine", zh: "核心命題：不完美才是傳播引擎" },
   subtitle: { en: "Your own hunch was right — the 'ruined' postcard is the story. Scroll through why a flaw out-travels a masterpiece.",
               zh: "你最初的直覺是對的——「拍爛掉的明信片」就是故事本身。捲動看看，為什麼一個缺陷比一張完美作品傳得更遠。" },
@@ -66,6 +81,7 @@ window.SITE_PAGES = [
 /* ===================== CAUSAL vs EFFECTUAL / COMPARISON ===================== */
 {
   slug: "causal-vs-effectual", layout: "comparison", icon: "compare_arrows",
+  nav:      { en: "Two logics", zh: "因果 vs 效果" }, part: "argument", tone: "split",
   title:    { en: "Causation vs. Effectuation", zh: "因果邏輯 vs 效果邏輯" },
   subtitle: { en: "Sarasvathy's two logics, side by side. Causal logic designs the stage and rules; effectual logic grows the improvised play on top.",
               zh: "Sarasvathy 的兩種邏輯並列。因果邏輯設計「舞台與規則」；效果邏輯長出「舞台上即興的戲」。" },
@@ -98,6 +114,7 @@ window.SITE_PAGES = [
 /* ===================== EFFECTUATION / ARTICLE ===================== */
 {
   slug: "effectuation", layout: "article", icon: "spa",
+  nav:      { en: "Effectuation", zh: "效果邏輯" }, part: "lens", tone: "green",
   title:    { en: "Effectuation: A Success That Was Brewed", zh: "效果邏輯：被「釀」出來的成功" },
   subtitle: { en: "Sarasvathy's five principles. Pikmin Bloom is less a planned success than a brewed one.",
               zh: "Sarasvathy 的五大原則。皮克敏與其說是規劃出來的成功，不如說是被釀出來的。" },
@@ -154,6 +171,7 @@ window.SITE_PAGES = [
 /* ===================== CAUSATION / ARTICLE ===================== */
 {
   slug: "causation", layout: "article", icon: "architecture",
+  nav:      { en: "Causation", zh: "因果邏輯" }, part: "lens", tone: "blue",
   title:    { en: "Causation: A TAM Expander by Design", zh: "因果邏輯：被設計出來的 TAM 擴張器" },
   subtitle: { en: "Predictive, goal-driven planning. A game that's ~1% of revenue, designed to expand the whole ecosystem's reachable market.",
               zh: "預測式、目標導向的規劃。一個只佔約 1% 營收的遊戲，被設計成擴張整個生態可服務市場的工具。" },
@@ -213,6 +231,7 @@ window.SITE_PAGES = [
 /* ===================== BEHAVIOR / ARTICLE ===================== */
 {
   slug: "behavior", layout: "article", icon: "directions_walk",
+  nav:      { en: "Habits", zh: "習慣設計" }, part: "lens", tone: "ochre",
   title:    { en: "Habit Design: Hooked Without the Poison", zh: "習慣設計：有鉤子，沒有毒" },
   subtitle: { en: "Eyal, Fogg, Duhigg and Self-Determination Theory — how a game with no FOMO and no death still builds a daily habit.",
               zh: "Eyal、Fogg、Duhigg 與自我決定論——一款無 FOMO、無死亡的遊戲，如何養成每日習慣。" },
@@ -259,6 +278,7 @@ window.SITE_PAGES = [
 /* ===================== VIRALITY / ARTICLE (the star) ===================== */
 {
   slug: "virality", layout: "article", icon: "share",
+  nav:      { en: "Virality", zh: "病毒傳播" }, part: "lens", tone: "red",
   title:    { en: "Virality: The Revenge of the Bad Shot", zh: "病毒傳播：失敗構圖的逆襲" },
   subtitle: { en: "Berger, Sharp, Godin and transmission psychology — why the 'ugly postcard' became Taiwan's most powerful marketing material in early 2026.",
               zh: "Berger、Sharp、Godin 與傳播心理——為何「醜明信片」成了 2026 年初台灣最強的行銷素材。" },
@@ -341,6 +361,7 @@ window.SITE_PAGES = [
 /* ===================== STRATEGY / ARTICLE ===================== */
 {
   slug: "strategy", layout: "article", icon: "insights",
+  nav:      { en: "Strategy", zh: "策略創新" }, part: "lens", tone: "plum",
   title:    { en: "Strategy: Won by Going Small", zh: "策略創新：贏在刻意做小" },
   subtitle: { en: "Jobs-to-be-Done, Blue Ocean, core competence, network effects — and an honest look at its fragility. Every reason it won is also a reason it's fragile.",
               zh: "用途理論、藍海、核心競爭力、網路效應——以及對其脆弱性的誠實檢視。每個成功原因，同時是脆弱原因。" },
@@ -406,6 +427,7 @@ window.SITE_PAGES = [
 /* ===================== DATA / DASHBOARD ===================== */
 {
   slug: "data", layout: "dashboard", icon: "monitoring",
+  nav:      { en: "Numbers", zh: "商業數據" }, part: "evidence", tone: "blue",
   title:    { en: "The Numbers", zh: "商業數據" },
   subtitle: { en: "Third-party estimates (AppMagic / Sensor Tower); App Store + Google Play IAP only, so the real figures are higher. The standout fact: revenue grows every year — the opposite of most mobile games.",
               zh: "第三方估算（AppMagic／Sensor Tower）；僅含 App Store + Google Play 內購，真實營收應更高。最突出的事實：營收逐年成長——與多數手遊相反。" },
@@ -444,6 +466,7 @@ window.SITE_PAGES = [
 /* ===================== TIMELINE ===================== */
 {
   slug: "timeline", layout: "timeline", icon: "timeline",
+  nav:      { en: "Timeline", zh: "時間軸" }, part: "evidence", tone: "green",
   title:    { en: "From GameCube to a Viral Walk", zh: "從 GameCube 到全民散步" },
   subtitle: { en: "Key moments — product, business, and the Taiwan surge.", zh: "關鍵時刻——產品、商業，與台灣爆紅。" },
   events: [
@@ -465,6 +488,7 @@ window.SITE_PAGES = [
 /* ===================== FACTS / FAQ ===================== */
 {
   slug: "facts", layout: "faq", icon: "fact_check",
+  nav:      { en: "Facts", zh: "事實檔案" }, part: "evidence", tone: "ochre",
   title:    { en: "Facts & Honest Caveats", zh: "事實檔案與誠實標註" },
   subtitle: { en: "What's verified, and what isn't. Cross-checked by multiple research passes; uncertainties are flagged, not hidden.",
               zh: "哪些已查證、哪些沒有。經多輪研究交叉驗證；不確定的地方標明，不藏。" },
@@ -499,6 +523,7 @@ window.SITE_PAGES = [
 /* ===================== QUIZ (custom renderer) ===================== */
 {
   slug: "quiz", layout: "quiz", icon: "quiz",
+  nav:      { en: "Quiz", zh: "隨堂測驗" }, part: "evidence", tone: "red",
   title:    { en: "Quick Quiz", zh: "隨堂測驗" },
   subtitle: { en: "Six questions to check whether the analysis clicked. Tap an answer to see if you're right.",
               zh: "六題，測測看分析有沒有看懂。點一個答案，馬上看對錯。" },
