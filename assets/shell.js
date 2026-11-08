@@ -25,8 +25,10 @@
 
   /* ---------- chrome i18n (page content strings live in the data) ---------- */
   var I18N = {
-    en: { close: "Close", menu: "Pages", skip: "Skip to content" },
-    zh: { close: "關閉", menu: "頁面", skip: "跳到內容" }
+    en: { close: "Close", menu: "Pages", skip: "Skip to content", chapters: "Chapters",
+          prev: "Previous", next: "Next", contents: "Contents" },
+    zh: { close: "關閉", menu: "頁面", skip: "跳到內容", chapters: "章節",
+          prev: "上一章", next: "下一章", contents: "目錄" }
   };
 
   /* ---------- sandbox-safe localStorage ---------- */
@@ -55,9 +57,17 @@
     return TWIN_DIR + path;
   }
 
+  /* Theme: an explicit choice (saved by the toggle) wins; otherwise follow the
+     OS. Nothing is written until the visitor actually toggles, so a first visit
+     keeps tracking prefers-color-scheme instead of freezing whatever it was. */
+  function systemTheme() {
+    try { return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; }
+    catch (e) { return "light"; }
+  }
+  var savedTheme = lsGet("theme");
   var state = {
     lang:  langFromDocument(),
-    theme: lsGet("theme") || "light"
+    theme: savedTheme === "dark" || savedTheme === "light" ? savedTheme : systemTheme()
   };
 
   /* ---------- helpers shared with app.js ---------- */
@@ -73,6 +83,28 @@
     });
   }
   function r(n) { return Math.round(n * 100) / 100; }
+
+  /* Chapter numbers: every page after home is a chapter, in SITE_PAGES order. */
+  function roman(n) {
+    var out = "", map = [[10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]];
+    map.forEach(function (m) { while (n >= m[0]) { out += m[1]; n -= m[0]; } });
+    return out;
+  }
+  function chapters() { return PAGES.filter(function (p) { return p.slug !== "home"; }); }
+  function chapterNo(p) {
+    var list = chapters(), i = list.indexOf(p);
+    return i === -1 ? "" : roman(i + 1);
+  }
+
+  /* The site's own five-petal glyph (drawn here, not taken from the game). */
+  function flower(cls) {
+    var petals = "";
+    for (var i = 0; i < 5; i++) {
+      petals += '<ellipse cx="0" cy="-6.2" rx="3.7" ry="5.6" transform="rotate(' + (i * 72) + ')"/>';
+    }
+    return '<svg class="flower' + (cls ? " " + cls : "") + '" viewBox="-12 -12 24 24" aria-hidden="true" focusable="false">' +
+      '<g fill="currentColor">' + petals + '</g><circle r="2.7" class="flower__eye"/></svg>';
+  }
 
   function pageHref(p) { return p.slug === "home" ? "index.html" : p.slug + ".html"; }
   function currentSlug() { return document.body.getAttribute("data-page") || "home"; }
@@ -102,7 +134,7 @@
     appbar.innerHTML =
       '<div class="appbar__inner">' +
         '<a class="brand" href="index.html">' +
-          '<span class="material-symbols-rounded brand__logo">local_florist</span>' +
+          flower("brand__logo") +
           '<span class="brand__name" id="brandName"></span>' +
         '</a>' +
         '<div class="appbar__actions">' +
@@ -110,7 +142,7 @@
              'hreflang="' + (state.lang === "en" ? "zh-Hant" : "en") + '" rel="alternate" ' +
              'title="Language" aria-label="' +
              (state.lang === "en" ? "切換到中文版 / View in Chinese" : "View in English / 切換到英文版") + '">' +
-            '<span class="material-symbols-rounded">translate</span>' +
+            '<span class="material-symbols-rounded icon-btn__icon" aria-hidden="true">translate</span>' +
             '<span class="icon-btn__txt" id="langLabel"></span>' +
           '</a>' +
           '<button class="icon-btn" id="themeToggle" type="button" title="Theme" aria-label="Toggle theme / 切換主題">' +
@@ -124,13 +156,23 @@
     var nav = document.createElement("nav");
     nav.className = "pagenav";
     nav.id = "pageNav";
-    nav.innerHTML = '<div class="pagenav__inner" id="pageNavInner"></div>';
+    nav.innerHTML =
+      '<div class="pagenav__inner">' +
+        '<div class="pagenav__strip" id="pageNavInner"></div>' +
+        '<details class="pagenav__drawer" id="pageDrawer">' +
+          '<summary class="pagenav__summary"><span class="pagenav__here" id="pageHere"></span>' +
+            '<span class="pagenav__toggle"><span id="drawerLabel"></span>' +
+            '<span class="material-symbols-rounded" aria-hidden="true">expand_more</span></span></summary>' +
+          '<ol class="pagenav__list" id="pageDrawerList"></ol>' +
+        '</details>' +
+      '</div>';
     document.body.insertBefore(nav, main);
 
     /* footer */
     var footer = document.createElement("footer");
     footer.className = "footer";
     footer.innerHTML = '<p id="footerText"></p>' +
+      '<p class="footer__lang" id="footerLang"></p>' +
       '<div class="profile-links" style="display:flex;gap:12px;justify-content:center;align-items:center;margin-top:10px">' +
         '<a class="icon-btn" href="https://www.peteraim.com" target="_blank" rel="noopener" title="Home" aria-label="Back to peteraim.com / 返回首頁">' +
           '<span class="material-symbols-rounded">home</span>' +
@@ -140,6 +182,17 @@
         '</a>' +
       '</div>';
     main.parentNode.insertBefore(footer, main.nextSibling);
+
+    /* The static HTML carries a plain "other language" link after the scripts
+       so crawlers and no-JS readers have it. With JS, fold it into the footer
+       instead of leaving it floating under the page chrome. */
+    var alt = document.querySelector(".lang-alt-link");
+    var slot = document.getElementById("footerLang");
+    if (alt && slot) {
+      var link = alt.querySelector("a");
+      if (link) slot.appendChild(link);
+      alt.parentNode.removeChild(alt);
+    }
 
     /* shared detail dialog (used by card layouts) */
     var dialog = document.createElement("dialog");
@@ -163,27 +216,69 @@
     dialog.addEventListener("click", function (e) { if (e.target === dialog) dialog.close(); });
   }
 
+  function navLabel(p) { return t(p.nav) || t(p.title); }
+
   function paintNav() {
-    var inner = document.getElementById("pageNavInner");
-    if (!inner) return;
-    inner.innerHTML = "";
+    var strip = document.getElementById("pageNavInner");
+    var list = document.getElementById("pageDrawerList");
+    var hereEl = document.getElementById("pageHere");
+    if (!strip) return;
     var here = currentSlug();
+    var stripHtml = "", listHtml = "";
     PAGES.forEach(function (p) {
-      var a = document.createElement("a");
-      a.className = "navpill" + (p.slug === here ? " navpill--active" : "");
-      a.href = pageHref(p);
-      if (p.slug === here) a.setAttribute("aria-current", "page");
-      a.innerHTML =
-        '<span class="material-symbols-rounded" aria-hidden="true">' +
-          escapeHtml(p.icon || "label") + "</span>" +
-        "<span>" + escapeHtml(t(p.title)) + "</span>";
-      inner.appendChild(a);
+      var on = p.slug === here, no = chapterNo(p);
+      var cur = on ? ' aria-current="page"' : "";
+      stripHtml += '<a class="navlink' + (on ? " navlink--active" : "") + '" href="' + escapeHtml(pageHref(p)) + '"' + cur +
+        ' title="' + escapeHtml(t(p.title)) + '">' +
+        (no ? '<span class="navlink__no">' + no + "</span>" : "") +
+        "<span>" + escapeHtml(navLabel(p)) + "</span></a>";
+      listHtml += '<li><a class="drawer-link tone--' + escapeHtml(p.tone || "red") + (on ? " drawer-link--active" : "") +
+        '" href="' + escapeHtml(pageHref(p)) + '"' + cur + ">" +
+        '<span class="drawer-link__no">' + (no || flower()) + "</span>" +
+        '<span class="drawer-link__title">' + escapeHtml(t(p.title)) + "</span></a></li>";
     });
-    /* keep the active pill in view within the scrolling nav */
-    var active = inner.querySelector(".navpill--active");
-    if (active && active.scrollIntoView) {
-      active.scrollIntoView({ block: "nearest", inline: "center" });
+    strip.innerHTML = stripHtml;
+    if (list) list.innerHTML = listHtml;
+    var page = currentPage();
+    if (hereEl && page) {
+      var no = chapterNo(page);
+      hereEl.innerHTML = (no ? '<span class="navlink__no">' + no + "</span>" : "") + escapeHtml(navLabel(page));
     }
+    /* keep the active link in view inside the strip without scrolling the page */
+    var active = strip.querySelector(".navlink--active");
+    if (active && strip.scrollWidth > strip.clientWidth) {
+      strip.scrollLeft = active.offsetLeft - (strip.clientWidth - active.offsetWidth) / 2;
+    }
+    updateFades();
+  }
+
+  /* Edge fades only on the side that actually has more links to scroll to. */
+  function updateFades() {
+    var strip = document.getElementById("pageNavInner");
+    if (!strip) return;
+    var max = strip.scrollWidth - strip.clientWidth;
+    strip.classList.toggle("is-fade-start", max > 2 && strip.scrollLeft > 2);
+    strip.classList.toggle("is-fade-end", max > 2 && strip.scrollLeft < max - 2);
+  }
+
+  function wireNav() {
+    var strip = document.getElementById("pageNavInner");
+    if (strip) {
+      strip.addEventListener("scroll", updateFades, { passive: true });
+      window.addEventListener("resize", updateFades);
+    }
+    var drawer = document.getElementById("pageDrawer");
+    if (!drawer) return;
+    document.addEventListener("click", function (e) {
+      if (drawer.open && !drawer.contains(e.target)) drawer.open = false;
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && drawer.open) {
+        drawer.open = false;
+        var sum = drawer.querySelector("summary");
+        if (sum) sum.focus();
+      }
+    });
   }
 
   /* ---------- chrome text in the active language ---------- */
@@ -201,6 +296,8 @@
     if (skip) skip.textContent = ui("skip");
     var nav = document.getElementById("pageNav");
     if (nav) nav.setAttribute("aria-label", ui("menu"));
+    var dl = document.getElementById("drawerLabel");
+    if (dl) dl.textContent = ui("chapters");
     var dc = document.getElementById("dialogClose");
     if (dc) dc.setAttribute("aria-label", ui("close"));
     paintNav();
@@ -213,7 +310,6 @@
     document.documentElement.setAttribute("data-theme", state.theme);
     var icon = document.getElementById("themeIcon");
     if (icon) icon.textContent = state.theme === "dark" ? "light_mode" : "dark_mode";
-    lsSet("theme", state.theme);
   }
   /* The toggle is a link now, so it is labelled with the language it leads TO,
      not the one already on screen. */
@@ -225,8 +321,18 @@
   function wire() {
     document.getElementById("themeToggle").addEventListener("click", function () {
       state.theme = state.theme === "dark" ? "light" : "dark";
+      lsSet("theme", state.theme);
       applyTheme();
     });
+    /* no saved choice yet: keep following the OS if it changes mid-visit */
+    try {
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function (e) {
+        if (lsGet("theme")) return;
+        state.theme = e.matches ? "dark" : "light";
+        applyTheme();
+      });
+    } catch (e) { /* old browsers: ignore */ }
+    wireNav();
   }
 
   /* =======================================================================
@@ -239,6 +345,7 @@
     lsGet: lsGet, lsSet: lsSet,
     pages: PAGES, meta: META,
     currentPage: currentPage, currentSlug: currentSlug, pageHref: pageHref,
+    chapters: chapters, chapterNo: chapterNo, flower: flower, navLabel: navLabel,
     refreshChrome: refreshChrome,
     dialog: function () { return document.getElementById("dialog"); }
   };
